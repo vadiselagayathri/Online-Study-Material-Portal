@@ -8,11 +8,14 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key")
 
 DB_CONFIG = {
-    "host": os.environ.get("MYSQLHOST"),
-    "user": os.environ.get("MYSQLUSER"),
-    "password": os.environ.get("MYSQLPASSWORD"),
-    "database": os.environ.get("MYSQLDATABASE"),
-    "port": int(os.environ.get("MYSQLPORT", "3306"))
+    "host": os.environ.get("MYSQLHOST", "localhost"),
+    "port": int(os.environ.get("MYSQLPORT", "3306")),
+    "user": os.environ.get("MYSQLUSER", "root"),
+    "password": os.environ.get("MYSQLPASSWORD", "NewPassword123"),
+    "database": os.environ.get(
+        "MYSQL_DATABASE",
+        os.environ.get("MYSQLDATABASE", "study_portal")
+    )
 }
 
 
@@ -556,28 +559,38 @@ def ensure_admin_account():
         return
 
     try:
-        conn = get_db_connection()
+        conn = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT id FROM users WHERE role = 'admin' LIMIT 1")
+        cursor.execute(
+            "SELECT id FROM users WHERE role = 'admin' LIMIT 1"
+        )
+
         existing_admin = cursor.fetchone()
 
         if existing_admin:
             print("Admin account already exists; no changes made.")
         else:
             password_hash = generate_password_hash(admin_password)
+
             cursor.execute(
-                "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)",
-                ("Administrator", admin_email, password_hash, "admin")
+                """
+                INSERT INTO users
+                (name, email, password_hash, role)
+                VALUES (%s, %s, %s, 'admin')
+                """,
+                ("Administrator", admin_email, password_hash)
             )
+
             conn.commit()
             print("Admin account created successfully.")
 
         cursor.close()
         conn.close()
+
     except Exception as e:
         print(f"Admin bootstrap skipped: {e}")
-# --------------------------------------------------------------
+
 
 if __name__ == "__main__":
     app.run(debug=True)
