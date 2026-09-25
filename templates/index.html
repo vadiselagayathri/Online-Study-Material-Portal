@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Home - StudyPortal{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <span class="eyebrow">COMMUNITY SERVICE PROJECT</span>
+    <h1>Online Study Material Portal</h1>
+    <p>Find notes, e-books, previous question papers, video lectures and useful reference resources in one place.</p>
+    <form class="search-box" action="{{ url_for('login') }}" method="get">
+      <input name="q" placeholder="Search study materials...">
+      <button>Search</button>
+    </form>
+    <a class="primary-btn" href="{{ url_for('login') }}">Explore Materials</a>
+  </div>
+</section>
+
+<section class="section" id="subjects">
+  <h2>Featured Subjects</h2>
+  <p class="section-text">Study materials organized according to subjects.</p>
+  <div class="card-grid">
+    {% for subject in subjects %}
+    <div class="subject-card">
+      <div class="subject-icon">{{ ['☕','🗄️','🐍','🌐','📐'][loop.index0 % 5] }}</div>
+      <h3>{{ subject.name }}</h3>
+      <p>Browse useful {{ subject.name }} learning resources.</p>
+      <a href="{{ url_for('login') }}">View Materials</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="features">
+  <h2>What You Can Find</h2>
+  <div class="card-grid">
+    <div class="feature-card"><h3>📚 Notes</h3><p>Subject-wise notes for easy learning.</p></div>
+    <div class="feature-card"><h3>📖 E-Books</h3><p>Useful digital books and references.</p></div>
+    <div class="feature-card"><h3>📝 Previous Papers</h3><p>Question papers for exam preparation.</p></div>
+    <div class="feature-card"><h3>🎥 Video Lectures</h3><p>Video resources for better understanding.</p></div>
+  </div>
+</section>
+
+<section class="recent">
+  <h2>Recent Updates</h2>
+  <div class="update"><span>NEW</span><p>Verified study resources are available through the student dashboard.</p></div>
+</section>
+{% endblock %}

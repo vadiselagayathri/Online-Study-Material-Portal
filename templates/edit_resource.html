@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Resource - StudyPortal{% endblock %}
+
+{% block content %}
+
+<section class="dashboard">
+
+  <div class="dashboard-heading">
+    <div>
+      <h1>Edit Resource</h1>
+      <p>Update the existing study resource and its link.</p>
+    </div>
+  </div>
+
+  <div class="admin-form">
+
+    <h2>Update Resource</h2>
+
+    <form
+      method="POST"
+      action="{{ url_for('update_resource', resource_id=resource.id) }}">
+
+      <!-- TITLE -->
+
+      <label>Resource Title</label>
+
+      <input
+        type="text"
+        name="title"
+        value="{{ resource.title }}"
+        required>
+
+      <br><br>
+
+
+      <!-- SUBJECT -->
+
+      <label>Subject</label>
+
+      <select name="subject_id" required>
+
+        {% for s in subjects %}
+
+        <option
+          value="{{ s.id }}"
+          {% if s.id == resource.subject_id %}
+          selected
+          {% endif %}>
+
+          {{ s.name }}
+
+        </option>
+
+        {% endfor %}
+
+      </select>
+
+      <br><br>
+
+
+      <!-- DESCRIPTION -->
+
+      <label>Description</label>
+
+      <textarea
+        name="description"
+        required>{{ resource.description }}</textarea>
+
+      <br><br>
+
+
+      <!-- RESOURCE TYPE -->
+
+      <label>Resource Type</label>
+
+      <select name="resource_type" required>
+
+        <option
+          value="notes"
+          {% if resource.resource_type == 'notes' %}
+          selected
+          {% endif %}>
+          Notes
+        </option>
+
+        <option
+          value="ebook"
+          {% if resource.resource_type == 'ebook' %}
+          selected
+          {% endif %}>
+          E-Book
+        </option>
+
+        <option
+          value="paper"
+          {% if resource.resource_type == 'paper' %}
+          selected
+          {% endif %}>
+          Previous Paper
+        </option>
+
+        <option
+          value="video"
+          {% if resource.resource_type == 'video' %}
+          selected
+          {% endif %}>
+          Video
+        </option>
+
+      </select>
+
+      <br><br>
+
+
+      <!-- RESOURCE LINK -->
+
+      <label>Resource Link</label>
+
+      <input
+        type="url"
+        name="url"
+        value="{{ resource.url }}"
+        required>
+
+      <br><br>
+
+
+      <!-- BUTTONS -->
+
+      <button
+        type="submit"
+        class="primary-btn">
+        Update Resource
+      </button>
+
+      <a
+        href="{{ url_for('admin') }}"
+        class="edit-btn">
+        Cancel
+      </a>
+
+    </form>
+
+  </div>
+
+</section>
+
+{% endblock %}

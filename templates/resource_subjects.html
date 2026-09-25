@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ resource_label }} - StudyPortal{% endblock %}
+{% block content %}
+<section class="dashboard">
+  <div class="dashboard-heading">
+    <div>
+      <h1>{{ resource_label }}</h1>
+      <p>Select a subject below. Its available resources will appear on this same screen.</p>
+    </div>
+  </div>
+
+  <div class="subject-selection-grid">
+    {% for s in subjects %}
+    <a class="subject-selection-card {% if selected_subject|string == s.id|string %}selected{% endif %}"
+       href="{{ url_for('resource_subjects', resource_type=resource_type, subject=s.id) }}#resources">
+      <span class="subject-number">{{ loop.index }}</span>
+      <div>
+        <h2>{{ s.name }}</h2>
+        <p>{{ s.resource_count }} resource(s) available</p>
+      </div>
+      <span class="subject-arrow">View →</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if selected_subject %}
+  <div id="resources" class="same-screen-resources">
+    <div class="results-heading">
+      <h2>Available {{ resource_label }}</h2>
+      <span>{{ resources|length }} resource(s)</span>
+    </div>
+
+    <div class="resource-container">
+      {% for r in resources %}
+      <article class="resource-card">
+        <div class="resource-icon">
+          {% if r.resource_type == 'notes' %}📚{% elif r.resource_type == 'ebook' %}📖{% elif r.resource_type == 'paper' %}📝{% else %}🎥{% endif %}
+        </div>
+        <div class="resource-info">
+          <span class="resource-subject">{{ r.subject }}</span>
+          <h3>{{ r.title }}</h3>
+          <p>{{ r.description }}</p>
+          <span class="tag">{{ resource_label }}</span>
+        </div>
+        <a class="open-btn" href="{{ r.url }}">Open Resource ↗</a>
+      </article>
+      {% else %}
+      <div class="empty">No verified {{ resource_label|lower }} found for this subject.</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <a class="back-link" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+</section>
+{% endblock %}

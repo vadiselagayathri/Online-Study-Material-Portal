@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - StudyPortal{% endblock %}
+{% block content %}
+<section class="dashboard">
+  <div class="dashboard-heading">
+    <div>
+      <h1>Student Dashboard</h1>
+      <p>Welcome, {{ session.get('name') }}. Browse verified study materials for every subject.</p>
+    </div>
+  </div>
+
+  <div class="category-grid">
+    <a class="category-card" href="{{ url_for('resource_subjects', resource_type='notes') }}"><span>📚</span><strong>Notes</strong><small>Subject notes & tutorials</small></a>
+    <a class="category-card" href="{{ url_for('resource_subjects', resource_type='ebook') }}"><span>📖</span><strong>E-Books</strong><small>Free books & references</small></a>
+    <a class="category-card" href="{{ url_for('resource_subjects', resource_type='paper') }}"><span>📝</span><strong>Previous Year Papers</strong><small>Question-paper resources</small></a>
+    <a class="category-card" href="{{ url_for('resource_subjects', resource_type='video') }}"><span>🎥</span><strong>Video Lectures</strong><small>NPTEL & learning videos</small></a>
+  </div>
+
+  <form class="dashboard-search" method="GET">
+    <input name="q" value="{{ q }}" placeholder="Search by title, subject or topic...">
+    {% if selected_subject %}<input type="hidden" name="subject" value="{{ selected_subject }}">{% endif %}
+    {% if selected_type %}<input type="hidden" name="type" value="{{ selected_type }}">{% endif %}
+    <button>🔍 Search</button>
+  </form>
+
+  <form id="filterForm" class="filter-bar" method="GET">
+    <input type="hidden" name="q" value="{{ q }}">
+    <select name="subject" onchange="this.form.submit()">
+      <option value="">All Subjects</option>
+      {% for s in subjects %}
+      <option value="{{ s.id }}" {% if selected_subject|string == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="type" onchange="this.form.submit()">
+      <option value="">All Resources</option>
+      <option value="notes" {% if selected_type=='notes' %}selected{% endif %}>Notes</option>
+      <option value="ebook" {% if selected_type=='ebook' %}selected{% endif %}>E-Books</option>
+      <option value="paper" {% if selected_type=='paper' %}selected{% endif %}>Previous Year Papers</option>
+      <option value="video" {% if selected_type=='video' %}selected{% endif %}>Video Lectures</option>
+    </select>
+    {% if selected_subject or selected_type or q %}<a class="clear-filter" href="{{ url_for('dashboard') }}">Clear Filters</a>{% endif %}
+  </form>
+
+  <div class="results-heading">
+    <h2>Study Materials</h2>
+    <span>{{ resources|length }} resource(s)</span>
+  </div>
+
+  <div class="resource-container">
+    {% for r in resources %}
+    <article class="resource-card">
+      <div class="resource-icon">
+        {% if r.resource_type == 'notes' %}📚{% elif r.resource_type == 'ebook' %}📖{% elif r.resource_type == 'paper' %}📝{% else %}🎥{% endif %}
+      </div>
+      <div class="resource-info">
+        <span class="resource-subject">{{ r.subject }}</span>
+        <h3>{{ r.title }}</h3>
+        <p>{{ r.description }}</p>
+        <span class="tag">{% if r.resource_type == 'notes' %}Notes{% elif r.resource_type == 'ebook' %}E-Book{% elif r.resource_type == 'paper' %}Previous Year Paper{% else %}Video Lecture{% endif %}</span>
+      </div>
+      <a class="open-btn" href="{{ r.url }}">Open Resource ↗</a>
+    </article>
+    {% else %}
+    <div class="empty">No verified resources found. Try another subject or resource type.</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
