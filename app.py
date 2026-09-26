@@ -550,17 +550,18 @@ def delete_resource(resource_id):
 # Set ADMIN_EMAIL and ADMIN_PASSWORD in the deployment environment.
 # On startup, create the admin account only when no admin account exists.
 # The password is stored using Werkzeug's secure password hash.
-def ensure_admin_account():
-    admin_email = os.environ.get("ADMIN_EMAIL")
-    admin_password = os.environ.get("ADMIN_PASSWORD")
 
-    if not admin_email or not admin_password:
-        print("ADMIN_EMAIL/ADMIN_PASSWORD not configured; skipping admin bootstrap.")
-        return
+
+
+def ensure_admin_account():
+    admin_email = "gayathri2217@gmail.com"
+    admin_password = "Gayathri@123"
 
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
+
+        password_hash = generate_password_hash(admin_password)
 
         cursor.execute(
             "SELECT id FROM users WHERE role = 'admin' LIMIT 1"
@@ -569,10 +570,21 @@ def ensure_admin_account():
         existing_admin = cursor.fetchone()
 
         if existing_admin:
-            print("Admin account already exists; no changes made.")
-        else:
-            password_hash = generate_password_hash(admin_password)
+            cursor.execute(
+                """
+                UPDATE users
+                SET email = %s,
+                    password_hash = %s,
+                    role = 'admin'
+                WHERE id = %s
+                """,
+                (admin_email, password_hash, existing_admin["id"])
+            )
 
+            conn.commit()
+            print("Admin account updated successfully.")
+
+        else:
             cursor.execute(
                 """
                 INSERT INTO users
@@ -589,8 +601,9 @@ def ensure_admin_account():
         conn.close()
 
     except Exception as e:
-        print(f"Admin bootstrap skipped: {e}")
+        print(f"Admin setup error: {e}")
 
 
 if __name__ == "__main__":
+    ensure_admin_account()
     app.run(debug=True)
