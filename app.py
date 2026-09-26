@@ -551,25 +551,31 @@ def delete_resource(resource_id):
 # On startup, create the admin account only when no admin account exists.
 # The password is stored using Werkzeug's secure password hash.
 
-
-
 def ensure_admin_account():
-    admin_email = "gayathri2217@gmail.com"
-    admin_password = "Gayathri@123"
+    admin_email = os.environ.get("ADMIN_EMAIL")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+
+    # Stop admin setup if credentials are not configured
+    if not admin_email or not admin_password:
+        print("ADMIN_EMAIL/ADMIN_PASSWORD not configured; skipping admin setup.")
+        return
 
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        password_hash = generate_password_hash(admin_password)
-
+        # Check whether an admin account already exists
         cursor.execute(
             "SELECT id FROM users WHERE role = 'admin' LIMIT 1"
         )
 
         existing_admin = cursor.fetchone()
 
+        # Convert the password into a secure hash
+        password_hash = generate_password_hash(admin_password)
+
         if existing_admin:
+            # Update the existing admin account
             cursor.execute(
                 """
                 UPDATE users
@@ -578,20 +584,29 @@ def ensure_admin_account():
                     role = 'admin'
                 WHERE id = %s
                 """,
-                (admin_email, password_hash, existing_admin["id"])
+                (
+                    admin_email,
+                    password_hash,
+                    existing_admin["id"]
+                )
             )
 
             conn.commit()
             print("Admin account updated successfully.")
 
         else:
+            # Create a new admin account
             cursor.execute(
                 """
                 INSERT INTO users
                 (name, email, password_hash, role)
                 VALUES (%s, %s, %s, 'admin')
                 """,
-                ("Administrator", admin_email, password_hash)
+                (
+                    "Administrator",
+                    admin_email,
+                    password_hash
+                )
             )
 
             conn.commit()
@@ -603,7 +618,7 @@ def ensure_admin_account():
     except Exception as e:
         print(f"Admin setup error: {e}")
 
+ensure_admin_account()
 
 if __name__ == "__main__":
-    ensure_admin_account()
     app.run(debug=True)
